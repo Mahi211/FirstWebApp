@@ -1,0 +1,95 @@
+﻿@page "/Väder"
+@attribute [StreamRendering]
+
+<PageTitle>Väder</PageTitle>
+
+<h1>Väder</h1>
+
+<p>Veckans Väder</p>
+
+@if (forecasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in forecasts)
+            {
+                <tr>
+                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.TemperatureC</td>
+                    <td>@forecast.TemperatureF</td>
+                    <td>@forecast.Summary</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private WeatherForecast[]? forecasts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Simulate asynchronous loading to demonstrate streaming rendering
+        await Task.Delay(500);
+
+        var startDate = DateOnly.FromDateTime(DateTime.Now);
+        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
+        int riktigTemperatur = Random.Shared.Next(-20, 45); // ska ändra från Random till API:N hära vill även göra en layout på framsidan
+        forecasts = Enumerable.Range(1, 6).Select(index => new WeatherForecast
+        {
+
+            Date = startDate.AddDays(index),
+            TemperatureC = riktigTemperatur,
+            Summary = TemperatureIntervall(riktigTemperatur)
+        }).ToArray();
+        string TemperatureIntervall(int riktigTemperatur)
+        {
+            if (riktigTemperatur < 0)
+            {
+                return "Freezing";
+            }
+            else if (riktigTemperatur >= 0 && riktigTemperatur < 5)
+            {
+                return "cold";
+            }
+            else if(riktigTemperatur >= 5 && riktigTemperatur < 10)
+            {
+                return "Mild";
+            }
+            else if (riktigTemperatur >= 10 && riktigTemperatur < 20)
+            {
+                return "Warm";
+            }
+            else if (riktigTemperatur >= 20 && riktigTemperatur < 30)
+            {
+                return "Hot";
+            }
+            else
+            {
+                return "Scorching";   // borde vara allt som är 30+ grader
+            }
+        }
+    }
+
+    private class WeatherForecast
+    {
+        public DateOnly Date { get; set; }
+        public int TemperatureC { get; set; }
+        public string? Summary { get; set; }
+        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        public int Downfall { get; set; }
+
+    }
+}
